@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'Article.dart';
+import 'ArticleDetailPage.dart';
+import 'LoginPage.dart'; // Ajoutez l'importation de LoginPage ici
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  int _currentIndex = 0;
+
+  final _pages = [
+    const MyHomePage(title: 'Accueil'),
+    LoginPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +31,30 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _pages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (int index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Accueil',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.login),
+              label: 'Connexion',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -27,7 +65,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -61,8 +99,20 @@ class _MyHomePageState extends State<MyHomePage> {
               itemBuilder: (context, index) {
                 final article = snapshot.data![index];
                 return ListTile(
+                  leading: Image.network(
+                    article.image,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
                   title: Text(article.title),
                   subtitle: Text('Prix : ${article.price}'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ArticleDetailPage(article: article)),
+                    );
+                  },
                 );
               },
             );
@@ -73,31 +123,4 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class Article {
-  final int id;
-  final String title;
-  final double price;
-  final String category;
-  final String description;
-  final String image;
 
-  Article({
-    required this.id,
-    required this.title,
-    required this.price,
-    required this.category,
-    required this.description,
-    required this.image,
-  });
-
-  factory Article.fromJson(Map<String, dynamic> json) {
-    return Article(
-      id: json['id'],
-      title: json['title'],
-      price: json['price'].toDouble(),
-      category: json['category'],
-      description: json['description'],
-      image: json['image'],
-    );
-  }
-}
