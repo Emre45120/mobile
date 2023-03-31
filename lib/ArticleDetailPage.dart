@@ -35,9 +35,9 @@ class ArticleDetailPage extends StatelessWidget {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Prix : ${article.price}',
+                    '${article.price}€',
                     textAlign: TextAlign.center, // Ajoutez cette ligne pour centrer le texte
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18,color: Colors.green)
                   ),
                   Text(
                     'Catégorie : ${article.category}',
