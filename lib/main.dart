@@ -23,7 +23,7 @@ List<Article> _allArticles = [];
 
 class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Set<int> _favorites = {};
   Set<int> _panier = {};
 
@@ -36,6 +36,7 @@ class _MyAppState extends State<MyApp> {
   List<Widget> _buildPages() {
     return [
       MyHomePage(
+        scaffoldKey: _scaffoldKey,
         title: 'Accueil',
         favorites: _favorites,
         toggleFavorite: _toggleFavorite,
@@ -77,6 +78,53 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Colors.blue),
+            child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Accueil'),
+            onTap: () {
+              _navigateToPage(0);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.favorite),
+            title: Text('Favoris'),
+            onTap: () {
+              _navigateToPage(1);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.shopping_cart),
+            title: Text('Panier'),
+            onTap: () {
+              _navigateToPage(2);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.login),
+            title: Text('Connexion'),
+            onTap: () {
+              _navigateToPage(3);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -85,34 +133,12 @@ class _MyAppState extends State<MyApp> {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
+        key: _scaffoldKey, // Ajoutez le scaffoldKey ici
         body: IndexedStack(
           index: _currentIndex,
           children: _buildPages(),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (int index) {
-            _navigateToPage(index);
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Accueil',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
-              label: 'Favoris',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart), // Ajouter une icône de panier
-              label: 'Panier', // Ajouter le texte "Panier"
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.login),
-              label: 'Connexion',
-            ),
-          ],
-        ),
+        drawer: _buildDrawer(context),
       ),
     );
   }
@@ -120,6 +146,7 @@ class _MyAppState extends State<MyApp> {
 
 
 class MyHomePage extends StatefulWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey;
   final Set<int> favorites;
   final Function(int) toggleFavorite;
   final Set<int> panier;
@@ -133,6 +160,7 @@ class MyHomePage extends StatefulWidget {
     required this.toggleFavorite,
     required this.panier,
     required this.togglePanier,
+    required this.scaffoldKey,
   }) : super(key: key);
 
   @override
@@ -212,7 +240,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-      ),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
+        )
+    ),
       body: FutureBuilder<List<Article>>(
         future: fetchArticles(),
         builder: (context, snapshot) {
