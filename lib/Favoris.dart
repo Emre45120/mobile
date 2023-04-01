@@ -4,14 +4,14 @@ import 'ArticleDetailPage.dart';
 
 
 class FavoritesPage extends StatelessWidget {
-  final GlobalKey<ScaffoldState> scaffoldKey; // Ajoutez cette ligne
+  final GlobalKey<ScaffoldState> scaffoldKey;
   final List<Article> allArticles;
   final Set<int> favorites;
   final Function(int) toggleFavorite;
 
   const FavoritesPage({
     Key? key,
-    required this.scaffoldKey, // Ajoutez cette ligne
+    required this.scaffoldKey,
     required this.allArticles,
     required this.favorites,
     required this.toggleFavorite,

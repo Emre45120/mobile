@@ -3,11 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  const LoginPage({
+    Key? key,
+    required this.scaffoldKey,
+  }) : super(key: key);
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
+
 class _LoginPageState extends State<LoginPage> {
+
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -34,6 +43,10 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connexion'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

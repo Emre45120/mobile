@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> {
         panier: _panier,
         togglePanier: _togglePanier,
       ),
-      LoginPage(),
+      LoginPage(scaffoldKey: _scaffoldKey),
     ];
   }
 
@@ -70,7 +70,8 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _togglePanier(int id) { // Ajouter cette fonction pour définir _togglePanier
+  void _togglePanier(int id) {
+    // Ajouter cette fonction pour définir _togglePanier
     setState(() {
       if (_panier.contains(id)) {
         _panier.remove(id);
@@ -87,7 +88,8 @@ class _MyAppState extends State<MyApp> {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(color: Colors.blue),
-            child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
+            child: Text(
+                'Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
           ),
           ListTile(
             leading: Icon(Icons.home),
@@ -134,20 +136,24 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        key: _scaffoldKey, // Ajoutez le scaffoldKey ici
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _buildPages(),
-        ),
-        drawer: _buildDrawer(context),
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            key: _scaffoldKey,
+            body: IndexedStack(
+              index: _currentIndex,
+              children: _buildPages(),
+            ),
+            drawer: _buildDrawer(context),
+          );
+        },
       ),
     );
   }
 }
 
 
-class MyHomePage extends StatefulWidget {
+  class MyHomePage extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
   final Set<int> favorites;
   final Function(int) toggleFavorite;
