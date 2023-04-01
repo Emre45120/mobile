@@ -4,12 +4,14 @@ import 'ArticleDetailPage.dart';
 
 
 class PanierPage extends StatelessWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey; // Ajoutez cette ligne
   final List<Article> allArticles;
   final Set<int> panier;
   final Function(int) togglePanier;
 
   const PanierPage({
     Key? key,
+    required this.scaffoldKey, // Ajoutez cette ligne
     required this.allArticles,
     required this.panier,
     required this.togglePanier,
@@ -24,6 +26,10 @@ class PanierPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Panier'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => scaffoldKey.currentState?.openDrawer(), // Utilisez scaffoldKey ici
+        ),
       ),
       body: ListView.builder(
         itemCount: panierArticles.length + 1,

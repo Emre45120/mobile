@@ -44,11 +44,13 @@ class _MyAppState extends State<MyApp> {
         togglePanier: _togglePanier,
       ),
       FavoritesPage(
+        scaffoldKey: _scaffoldKey,
         allArticles: _allArticles,
         favorites: _favorites,
         toggleFavorite: _toggleFavorite,
       ),
       PanierPage(
+        scaffoldKey: _scaffoldKey,
         allArticles: _allArticles,
         panier: _panier,
         togglePanier: _togglePanier,

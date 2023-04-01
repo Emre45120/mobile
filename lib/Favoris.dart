@@ -4,12 +4,14 @@ import 'ArticleDetailPage.dart';
 
 
 class FavoritesPage extends StatelessWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey; // Ajoutez cette ligne
   final List<Article> allArticles;
   final Set<int> favorites;
   final Function(int) toggleFavorite;
 
   const FavoritesPage({
     Key? key,
+    required this.scaffoldKey, // Ajoutez cette ligne
     required this.allArticles,
     required this.favorites,
     required this.toggleFavorite,
@@ -22,6 +24,10 @@ class FavoritesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favoris'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => scaffoldKey.currentState?.openDrawer(), // Utilisez scaffoldKey ici
+        ),
       ),
       body: ListView.builder(
         itemCount: favoriteArticles.length,
