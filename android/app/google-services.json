@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "226795562214",
+    "project_id": "sae-mobile-b1a53",
+    "storage_bucket": "sae-mobile-b1a53.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:226795562214:android:15e1d68bcc10cb9eb9c727",
+        "android_client_info": {
+          "package_name": "com.example.testt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "226795562214-e276e8t4qo8ikfsivd9qvq4gmcgoa0qk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6jFwPcXEKwyUYpLshEFmVbVg_3Jfcai8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "226795562214-e276e8t4qo8ikfsivd9qvq4gmcgoa0qk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "226795562214-6e1fge9vg1dkjcsi4fclthlsenldhikg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.testt"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

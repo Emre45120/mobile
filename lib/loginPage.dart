@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class LoginPage extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
@@ -20,21 +22,23 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  Future<String?> _login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('https://fakestoreapi.com/auth/login'),
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-      }),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      return jsonResponse['token'];
-    } else {
-      throw Exception('Erreur lors de la connexion');
+  Future<UserCredential?> _login(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('Aucun utilisateur trouvé avec cet email.');
+      } else if (e.code == 'wrong-password') {
+        print('Mot de passe incorrect.');
+      }
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 
@@ -68,14 +72,16 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                final token = await _login(
+                print('Bouton Se connecter appuyé'); // Ajouter cette ligne
+                final userCredential = await _login(
                   _usernameController.text,
                   _passwordController.text,
                 );
-                if (token != null) {
-                  // Vous pouvez utiliser le token ici pour accéder à d'autres parties de l'application
-                  print('Token: $token');
+                if (userCredential != null) {
+                  // L'utilisateur est connecté
+                  print('Utilisateur connecté: ${userCredential.user}');
                 } else {
+                  print('Erreur lors de la connexion'); // Ajouter cette ligne
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Erreur lors de la connexion')),
                   );
