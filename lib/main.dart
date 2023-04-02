@@ -9,6 +9,13 @@ import 'Favoris.dart';
 import 'Panier.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'AuthWrapper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,8 +24,25 @@ void main() async {
 }
 
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: AuthWrapper(
+        child: AppWithNavigation(),
+      ),
+    );
+  }
+}
+
+  class AppWithNavigation extends StatefulWidget {
+  const AppWithNavigation({Key? key}) : super(key: key);
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -26,17 +50,46 @@ class MyApp extends StatefulWidget {
 
 List<Article> _allArticles = [];
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<AppWithNavigation> {
   int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Set<int> _favorites = {};
   Set<int> _panier = {};
+  StreamSubscription<User?>? _authStateSubscription; // Ajoutez cette ligne
 
   void _navigateToPage(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
+
+  void initAuthStateListener() {
+    _authStateSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        // Si l'utilisateur est connecté, chargez les données
+        loadFavorites().then((loadedFavorites) {
+          setState(() {
+            _favorites = loadedFavorites;
+          });
+        });
+
+        loadPanier().then((loadedPanier) {
+          setState(() {
+            _panier = loadedPanier;
+          });
+        });
+      } else {
+        // Si l'utilisateur est déconnecté, videz les données
+        setState(() {
+          _favorites = {};
+          _panier = {};
+        });
+      }
+    });
+  }
+
+
+
 
   List<Widget> _buildPages() {
     return [
@@ -60,8 +113,56 @@ class _MyAppState extends State<MyApp> {
         panier: _panier,
         togglePanier: _togglePanier,
       ),
-      LoginPage(scaffoldKey: _scaffoldKey),
+      LoginPage(
+          scaffoldKey: _scaffoldKey
+      ),
     ];
+  }
+
+  Future<void> saveFavorites(Set<int> favorites) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favorites', favorites.map((id) => id.toString()).toList());
+  }
+
+  Future<void> savePanier(Set<int> panier) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('panier', panier.map((id) => id.toString()).toList());
+  }
+
+  Future<Set<int>> loadFavorites() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? storedFavorites = prefs.getStringList('favorites');
+    return storedFavorites != null ? storedFavorites.map((id) => int.parse(id)).toSet() : {};
+  }
+
+  Future<Set<int>> loadPanier() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? storedPanier = prefs.getStringList('panier');
+    return storedPanier != null ? storedPanier.map((id) => int.parse(id)).toSet() : {};
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    initAuthStateListener();
+    loadFavorites().then((loadedFavorites) {
+      setState(() {
+        _favorites = loadedFavorites;
+      });
+    });
+
+    loadPanier().then((loadedPanier) {
+      setState(() {
+        _panier = loadedPanier;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _authStateSubscription?.cancel(); // Ajoutez cette ligne
+    super.dispose();
   }
 
 
@@ -72,21 +173,24 @@ class _MyAppState extends State<MyApp> {
       } else {
         _favorites.add(id);
       }
+      saveFavorites(_favorites);
     });
   }
 
   void _togglePanier(int id) {
-    // Ajouter cette fonction pour définir _togglePanier
     setState(() {
       if (_panier.contains(id)) {
         _panier.remove(id);
       } else {
         _panier.add(id);
       }
+      savePanier(_panier);
     });
   }
 
+
   Widget _buildDrawer(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -120,41 +224,47 @@ class _MyAppState extends State<MyApp> {
               Navigator.pop(context);
             },
           ),
-          ListTile(
-            leading: Icon(Icons.login),
-            title: Text('Connexion'),
-            onTap: () {
-              _navigateToPage(3);
-              Navigator.pop(context);
-            },
-          ),
+          if (user == null)
+            ListTile(
+              leading: Icon(Icons.login),
+              title: Text('Connexion'),
+              onTap: () {
+                _navigateToPage(3);
+                Navigator.pop(context);
+              },
+            ),
+          if (user != null)
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Déconnexion'),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                setState(() {
+                  _currentIndex = 0;
+                });
+                Navigator.pop(context);
+              },
+            ),
         ],
       ),
     );
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return Scaffold(
+      key: _scaffoldKey,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _buildPages(),
       ),
-      home: Builder(
-        builder: (BuildContext context) {
-          return Scaffold(
-            key: _scaffoldKey,
-            body: IndexedStack(
-              index: _currentIndex,
-              children: _buildPages(),
-            ),
-            drawer: _buildDrawer(context),
-          );
-        },
-      ),
+      drawer: _buildDrawer(context),
     );
   }
+
 }
 
 
@@ -291,18 +401,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: widget.favorites.contains(article.id)
-                                  ? Icon(Icons.favorite, color: Colors.red)
-                                  : Icon(Icons.favorite_border),
-                              onPressed: () => widget.toggleFavorite(article.id),
-                            ),
-                            IconButton(
-                              icon: widget.panier.contains(article.id)
-                                  ? Icon(Icons.shopping_cart, color: Colors.blue)
-                                  : Icon(Icons.shopping_cart_outlined),
-                              onPressed: () => widget.togglePanier(article.id),
-                            ),
+                            IconButton(icon: widget.favorites.contains(article.id) ? Icon(Icons.favorite, color: Colors.red) : Icon(Icons.favorite_border), onPressed: () => widget.toggleFavorite(article.id),),
+
+                            IconButton(icon: widget.panier.contains(article.id) ? Icon(Icons.shopping_cart, color: Colors.blue) : Icon(Icons.shopping_cart_outlined), onPressed: () => widget.togglePanier(article.id),),
+
                           ],
                         ),
                       );
