@@ -13,6 +13,8 @@ import 'AuthWrapper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 
 
@@ -120,26 +122,59 @@ class _MyAppState extends State<AppWithNavigation> {
   }
 
   Future<void> saveFavorites(Set<int> favorites) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('favorites', favorites.map((id) => id.toString()).toList());
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      print('Saving favorites: $favorites'); // Ajouter cette ligne
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'favorites': favorites.toList()});
+    }
   }
+
 
   Future<void> savePanier(Set<int> panier) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('panier', panier.map((id) => id.toString()).toList());
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      print('Saving panier: $panier'); // Ajoutez cette ligne
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({'panier': panier.toList()});
+    }
   }
+
+
 
   Future<Set<int>> loadFavorites() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? storedFavorites = prefs.getStringList('favorites');
-    return storedFavorites != null ? storedFavorites.map((id) => int.parse(id)).toSet() : {};
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        List<dynamic> storedFavorites = userDoc.data()?['favorites'] ?? []; // Ajoutez le "?? []"
+        print('Loaded favorites: $storedFavorites');
+        return storedFavorites.map((id) => id as int).toSet();
+      }
+    }
+    return {};
   }
 
+
+
   Future<Set<int>> loadPanier() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? storedPanier = prefs.getStringList('panier');
-    return storedPanier != null ? storedPanier.map((id) => int.parse(id)).toSet() : {};
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      List<int>? storedPanier = doc['panier']?.cast<int>();
+      print('Loaded panier: $storedPanier'); // Ajoutez cette ligne
+      return storedPanier != null ? storedPanier.toSet() : {};
+    }
+    return {};
   }
+
 
 
   @override
@@ -147,6 +182,7 @@ class _MyAppState extends State<AppWithNavigation> {
     super.initState();
     initAuthStateListener();
     loadFavorites().then((loadedFavorites) {
+      print('Initial favorites: $loadedFavorites');
       setState(() {
         _favorites = loadedFavorites;
       });
@@ -173,8 +209,9 @@ class _MyAppState extends State<AppWithNavigation> {
       } else {
         _favorites.add(id);
       }
-      saveFavorites(_favorites);
     });
+    print('Toggled favorite, new favorites: $_favorites'); // Ajouter cette ligne
+    saveFavorites(_favorites);
   }
 
   void _togglePanier(int id) {
@@ -184,8 +221,9 @@ class _MyAppState extends State<AppWithNavigation> {
       } else {
         _panier.add(id);
       }
-      savePanier(_panier);
     });
+    print('Toggled panier, new panier: $_panier'); // Ajoutez cette ligne
+    savePanier(_panier);
   }
 
 
@@ -297,29 +335,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _page = 1;
 
   List<Article> _displayedArticles = [];
-  Set<int> _favorites = {};
-  Set<int> _panier = {};
 
-
-  void _toggleFavorite(int id) {
-    setState(() {
-      if (_favorites.contains(id)) {
-        _favorites.remove(id);
-      } else {
-        _favorites.add(id);
-      }
-    });
-  }
-
-  void _togglePanier(int id) {
-    setState(() {
-      if (_panier.contains(id)) {
-        _panier.remove(id);
-      } else {
-        _panier.add(id);
-      }
-    });
-  }
 
   Future<List<Article>> fetchArticles() async {
     final response = await http.get(Uri.parse('https://fakestoreapi.com/products'));
