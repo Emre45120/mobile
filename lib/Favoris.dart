@@ -26,7 +26,7 @@ class FavoritesPage extends StatelessWidget {
         title: const Text('Favoris'),
         leading: IconButton(
           icon: Icon(Icons.menu),
-          onPressed: () => scaffoldKey.currentState?.openDrawer(), // Utilisez scaffoldKey ici
+          onPressed: () => scaffoldKey.currentState?.openDrawer(),
         ),
       ),
       body: ListView.builder(

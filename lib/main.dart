@@ -57,7 +57,7 @@ class _MyAppState extends State<AppWithNavigation> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Set<int> _favorites = {};
   Set<int> _panier = {};
-  StreamSubscription<User?>? _authStateSubscription; // Ajoutez cette ligne
+  StreamSubscription<User?>? _authStateSubscription;
 
   void _navigateToPage(int index) {
     setState(() {
@@ -129,7 +129,7 @@ class _MyAppState extends State<AppWithNavigation> {
   Future<void> saveFavorites(Set<int> favorites) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      print('Saving favorites: $favorites'); // Ajouter cette ligne
+      print('Saving favorites: $favorites');
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -141,7 +141,7 @@ class _MyAppState extends State<AppWithNavigation> {
   Future<void> savePanier(Set<int> panier) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      print('Saving panier: $panier'); // Ajoutez cette ligne
+      print('Saving panier: $panier');
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -156,7 +156,7 @@ class _MyAppState extends State<AppWithNavigation> {
     if (user != null) {
       final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (userDoc.exists) {
-        List<dynamic> storedFavorites = userDoc.data()?['favorites'] ?? []; // Ajoutez le "?? []"
+        List<dynamic> storedFavorites = userDoc.data()?['favorites'] ?? [];
         print('Loaded favorites: $storedFavorites');
         return storedFavorites.map((id) => id as int).toSet();
       }
@@ -174,7 +174,7 @@ class _MyAppState extends State<AppWithNavigation> {
           .doc(user.uid)
           .get();
       List<int>? storedPanier = doc['panier']?.cast<int>();
-      print('Loaded panier: $storedPanier'); // Ajoutez cette ligne
+      print('Loaded panier: $storedPanier');
       return storedPanier != null ? storedPanier.toSet() : {};
     }
     return {};
@@ -202,7 +202,7 @@ class _MyAppState extends State<AppWithNavigation> {
 
   @override
   void dispose() {
-    _authStateSubscription?.cancel(); // Ajoutez cette ligne
+    _authStateSubscription?.cancel();
     super.dispose();
   }
 
@@ -215,7 +215,7 @@ class _MyAppState extends State<AppWithNavigation> {
         _favorites.add(id);
       }
     });
-    print('Toggled favorite, new favorites: $_favorites'); // Ajouter cette ligne
+    print('Toggled favorite, new favorites: $_favorites');
     saveFavorites(_favorites);
   }
 
@@ -227,7 +227,7 @@ class _MyAppState extends State<AppWithNavigation> {
         _panier.add(id);
       }
     });
-    print('Toggled panier, new panier: $_panier'); // Ajoutez cette ligne
+    print('Toggled panier, new panier: $_panier');
     savePanier(_panier);
   }
 
@@ -271,7 +271,7 @@ class _MyAppState extends State<AppWithNavigation> {
             leading: Icon(Icons.search),
             title: Text('Rechercher'),
             onTap: () {
-              _navigateToPage(4); // 4 est l'index de la page de recherche
+              _navigateToPage(4);
               Navigator.pop(context);
             },
           ),
@@ -486,7 +486,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   List<Article> _searchResults = [];
   String _searchText = '';
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // Ajouter la clé ici
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _updateSearchResults(String searchText) {
     setState(() {
@@ -500,7 +500,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Utiliser la clé ici
+      key: _scaffoldKey,
       appBar: AppBar(
         title: TextField(
           onChanged: _updateSearchResults,
