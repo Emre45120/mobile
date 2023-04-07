@@ -1,16 +1,20 @@
 # testt
 
-A new Flutter project.
+étudiant 1 : ARSLANHAN Emre
+étudiant 2 : ELAKROUTI Abdelhakim
 
-## Getting Started
+Fonctionnalité réalisé :
 
-This project is a starting point for a Flutter application.
+  - Consultation des articles
+  - Gestion des articles favoris
+  - Gestion des achats
+  - Authentification
+  - Naviguation
 
-A few resources to get you started if this is your first Flutter project:
+Fonctionnalité en cours :
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+   - Historique des achats
+   - Outils de recherche
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+Plus d'informations : Nous avons utilisé l'API "Firebase" pour effectuer notre système d'authentification. L'API de "FakeStoreAPI" à aussi était utiliser pour avoir des articles déjà fait.
