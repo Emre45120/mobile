@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -358,6 +359,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+
+  void _updateDisplayedArticles() {
+    int startIndex = (_page - 1) * _perPage;
+    int endIndex = min(startIndex + _perPage, _allArticles.length);
+    _displayedArticles = _allArticles.sublist(startIndex, endIndex);
+  }
+
   Future<List<Article>> fetchArticles() async {
     final response = await http.get(Uri.parse('https://fakestoreapi.com/products'));
 
@@ -369,12 +377,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       throw Exception('Erreur lors du chargement des articles');
     }
-  }
-
-  void _updateDisplayedArticles() {
-    int startIndex = (_page - 1) * _perPage;
-    int endIndex = min(startIndex + _perPage, _allArticles.length);
-    _displayedArticles = _allArticles.sublist(startIndex, endIndex);
   }
 
   void _nextPage() {

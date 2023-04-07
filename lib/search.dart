@@ -30,6 +30,12 @@ class _SearchPageState extends State<SearchPage> {
   List<Article> _searchResults = [];
   String _searchText = '';
 
+  @override
+  void initState() {
+    super.initState();
+    _searchResults = widget.allArticles;
+  }
+
   void _updateSearchResults(String searchText) {
     setState(() {
       _searchText = searchText;
@@ -39,53 +45,83 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
+  void _sortResults(bool ascending) {
+    setState(() {
+      _searchResults.sort((a, b) => ascending ? a.price.compareTo(b.price) : b.price.compareTo(a.price));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
         title: TextField(
-          onChanged: _updateSearchResults,
-          decoration: InputDecoration(
-            hintText: 'Rechercher...',
-            border: InputBorder.none,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
-        ),
-      ),
-      body: ListView.builder(
-        itemCount: _searchResults.length,
-        itemBuilder: (context, index) {
-          final article = _searchResults[index];
-          return ListTile(
-            leading: Image.network(
-              article.image,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            ),
-            title: Text(article.title),
-            subtitle: Text('${article.price}€',style: const TextStyle(color: Colors.green)),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ArticleDetailPage(article: article)),
-              );
-            },
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(icon: widget.favorites.contains(article.id) ? Icon(Icons.favorite, color: Colors.red) : Icon(Icons.favorite_border), onPressed: () => widget.toggleFavorite(article.id),),
-
-                IconButton(icon: widget.panier.contains(article.id) ? Icon(Icons.shopping_cart, color: Colors.blue) : Icon(Icons.shopping_cart_outlined), onPressed: () => widget.togglePanier(article.id),),
-
-              ],
-            ),
-          );
-        },
-      ),
+        onChanged: _updateSearchResults,
+        decoration: InputDecoration(
+        hintText: 'Rechercher...',
+        border: InputBorder.none,
+    ),
+    ),
+    leading: IconButton(
+    icon: Icon(Icons.menu),
+    onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
+    ),
+    actions: [
+    PopupMenuButton<bool>(
+    icon: Icon(Icons.sort),
+    itemBuilder: (BuildContext context) => <PopupMenuEntry<bool>>[
+    const PopupMenuItem<bool>(
+    value: true,
+    child: Text('Prix croissant'),
+    ),
+    const PopupMenuItem<bool>(
+    value: false,
+    child: Text('Prix décroissant'),
+    ),
+    ],
+    onSelected: _sortResults,
+    ),
+    ],
+    ),
+    body: ListView.builder(
+    itemCount: _searchResults.length,
+    itemBuilder: (context, index) {
+    final article = _searchResults[index];
+    return ListTile(
+    leading: Image.network(
+    article.image,
+    width: 50,
+    height: 50,
+    fit: BoxFit.cover,
+    ),
+    title: Text(article.title),
+    subtitle: Text('${article.price}€', style: const TextStyle(color: Colors.green)),
+    onTap: () {
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => ArticleDetailPage(article: article)),
+    );
+    },
+    trailing: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+    IconButton(
+    icon: widget.favorites.contains(article.id)
+    ? Icon(Icons.favorite, color: Colors.red)
+        : Icon(Icons.favorite_border),
+    onPressed: () => widget.toggleFavorite(article.id),
+    ),
+    IconButton(
+      icon: widget.panier.contains(article.id)
+          ? Icon(Icons.shopping_cart, color: Colors.blue)
+          : Icon(Icons.shopping_cart_outlined),
+      onPressed: () => widget.togglePanier(article.id),
+    ),
+    ],
+    ),
+    );
+    },
+    ),
     );
   }
 }
