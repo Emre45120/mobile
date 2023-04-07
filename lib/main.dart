@@ -120,7 +120,7 @@ class _MyAppState extends State<AppWithNavigation> {
         panier: _panier,
         togglePanier: _togglePanier,
         historiqueAchats: [],
-        onUpdateHistoriqueAchats: _updateHistoriqueAchats, // Ajoutez cette ligne
+        onUpdateHistoriqueAchats: _updateHistoriqueAchats,
       ),
       LoginPage(
           scaffoldKey: _scaffoldKey
@@ -130,10 +130,10 @@ class _MyAppState extends State<AppWithNavigation> {
           favorites: _favorites,
           toggleFavorite: _toggleFavorite,
           panier: _panier,
-          togglePanier: _togglePanier
+          togglePanier: _togglePanier, scaffoldKey: _scaffoldKey,
       ),
       HistoriqueAchatsPage(
-          historiqueAchats: historiqueAchats
+          historiqueAchats: historiqueAchats, scaffoldKey: _scaffoldKey,
       ),
     ];
   }
@@ -181,7 +181,7 @@ class _MyAppState extends State<AppWithNavigation> {
 
   @override
   void dispose() {
-    _authStateSubscription?.cancel(); // Ajoutez cette ligne
+    _authStateSubscription?.cancel();
     super.dispose();
   }
 

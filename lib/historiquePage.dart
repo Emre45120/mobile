@@ -4,8 +4,9 @@ import 'ArticleDetailPage.dart';
 
 class HistoriqueAchatsPage extends StatefulWidget {
   final List<Article> historiqueAchats;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
-  const HistoriqueAchatsPage({Key? key, required this.historiqueAchats}) : super(key: key);
+  const HistoriqueAchatsPage({Key? key, required this.historiqueAchats, required this.scaffoldKey}) : super(key: key);
 
   @override
   _HistoriqueAchatsPageState createState() => _HistoriqueAchatsPageState();
@@ -15,7 +16,13 @@ class _HistoriqueAchatsPageState extends State<HistoriqueAchatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Historique des achats')),
+      appBar: AppBar(
+        title: const Text('Historique des achats'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
+        ),
+      ),
       body: ListView.builder(
         itemCount: widget.historiqueAchats.length,
         itemBuilder: (context, index) {

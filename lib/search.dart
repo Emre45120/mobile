@@ -10,6 +10,7 @@ class SearchPage extends StatefulWidget {
   final Function(int) toggleFavorite;
   final Set<int> panier;
   final Function(int) togglePanier;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   const SearchPage({
     Key? key,
@@ -18,6 +19,7 @@ class SearchPage extends StatefulWidget {
     required this.toggleFavorite,
     required this.panier,
     required this.togglePanier,
+    required this.scaffoldKey,
   }) : super(key: key);
 
   @override
@@ -27,7 +29,6 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   List<Article> _searchResults = [];
   String _searchText = '';
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // Ajouter la clé ici
 
   void _updateSearchResults(String searchText) {
     setState(() {
@@ -41,7 +42,6 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Utiliser la clé ici
       appBar: AppBar(
         title: TextField(
           onChanged: _updateSearchResults,
@@ -52,9 +52,7 @@ class _SearchPageState extends State<SearchPage> {
         ),
         leading: IconButton(
           icon: Icon(Icons.menu),
-          onPressed: () {
-            _scaffoldKey.currentState!.openDrawer();
-          },
+          onPressed: () => widget.scaffoldKey.currentState?.openDrawer(),
         ),
       ),
       body: ListView.builder(
