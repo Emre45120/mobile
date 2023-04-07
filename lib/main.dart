@@ -60,7 +60,7 @@ class _MyAppState extends State<AppWithNavigation> {
   Set<int> _favorites = {};
   Set<int> _panier = {};
   List<Article> historiqueAchats = [];
-  StreamSubscription<User?>? _authStateSubscription; // Ajoutez cette ligne
+  StreamSubscription<User?>? _authStateSubscription;
 
   void _navigateToPage(int index) {
     setState(() {

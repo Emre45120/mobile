@@ -77,7 +77,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               obscureText: true,
             ),
-            // Ajoutez le champ de mot de passe de confirmation ici:
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
@@ -120,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose(); // Ajoutez cette ligne
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
