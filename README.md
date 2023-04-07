@@ -8,9 +8,9 @@ Fonctionnalité réalisé :
   - Consultation des articles
   - Gestion des articles favoris
   - Gestion des achats
-  - Authentification
+  - Authentification ( Connexion + création de compte )
   - Naviguation
-  - Outils de recherche ( La barre de recherche est fonctionnel mais lrosque nous nous rendons sur la page "Recherche" nous sommes bloqué sur celle-ci, pour revenir en arrière vous pouvez modifier l'URL)
+  - Outils de recherche ( La barre de recherche est fonctionnel mais lorsque nous nous rendons sur la page "Recherche" nous sommes bloqué sur celle-ci, pour revenir en arrière vous pouvez modifier l'URL)
 
 Fonctionnalité en cours :
 
