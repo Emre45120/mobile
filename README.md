@@ -1,16 +1,16 @@
 # testt
 
-étudiant 1 : ARSLANHAN Emre
-étudiant 2 : ELAKROUTI Abdelhakim
+Étudiant 1 : ARSLANHAN Emre
+Étudiant 2 : ELAKROUTI Abdelhakim
 
-Fonctionnalité réalisé :
+Fonctionnalité réalisée :
 
   - Consultation des articles
   - Gestion des articles favoris
   - Gestion des achats
-  - Authentification ( Connexion + création de compte )
-  - Naviguation
-  - Outils de recherche avec une implémentation de trie aussi bien croissant que décroissant (J'ai essayé d'afficher tous les articles mais les articles ne s'affichents pas)
+  - Authentification (connexion + création de compte)
+  - Navigation
+  - Outils de recherche + fonction de trie aussi bien croissant que décroissant (J'ai essayé d'afficher tous les articles, mais les articles ne s'affichent pas.)
   - Historique des achats
 
-Plus d'informations : Nous avons utilisé l'API "Firebase" pour effectuer notre système d'authentification. L'API de "FakeStoreAPI" à aussi était utiliser pour avoir des articles déjà fait.
+Plus d'informations : nous avons utilisé l'API "Firebase" pour effectuer notre système d'authentification. L'API de "FakeStoreAPI" à aussi était utiliser pour avoir des articles déjà fait.
