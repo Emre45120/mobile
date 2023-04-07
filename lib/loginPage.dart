@@ -77,6 +77,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               obscureText: true,
             ),
+            // Ajoutez le champ de mot de passe de confirmation ici:
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {

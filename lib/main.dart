@@ -1,3 +1,4 @@
+import 'package:SAE/search.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -13,8 +14,8 @@ import 'AuthWrapper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'historiquePage.dart';
 
 
 
@@ -57,11 +58,18 @@ class _MyAppState extends State<AppWithNavigation> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Set<int> _favorites = {};
   Set<int> _panier = {};
-  StreamSubscription<User?>? _authStateSubscription;
+  List<Article> historiqueAchats = [];
+  StreamSubscription<User?>? _authStateSubscription; // Ajoutez cette ligne
 
   void _navigateToPage(int index) {
     setState(() {
       _currentIndex = index;
+    });
+  }
+
+  void _updateHistoriqueAchats(List<Article> articlesAchetes) {
+    setState(() {
+      historiqueAchats.addAll(articlesAchetes);
     });
   }
 
@@ -111,6 +119,8 @@ class _MyAppState extends State<AppWithNavigation> {
         allArticles: _allArticles,
         panier: _panier,
         togglePanier: _togglePanier,
+        historiqueAchats: [],
+        onUpdateHistoriqueAchats: _updateHistoriqueAchats, // Ajoutez cette ligne
       ),
       LoginPage(
           scaffoldKey: _scaffoldKey
@@ -122,64 +132,34 @@ class _MyAppState extends State<AppWithNavigation> {
           panier: _panier,
           togglePanier: _togglePanier
       ),
+      HistoriqueAchatsPage(
+          historiqueAchats: historiqueAchats
+      ),
     ];
   }
 
 
   Future<void> saveFavorites(Set<int> favorites) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      print('Saving favorites: $favorites');
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({'favorites': favorites.toList()});
-    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favorites', favorites.map((id) => id.toString()).toList());
   }
-
 
   Future<void> savePanier(Set<int> panier) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      print('Saving panier: $panier');
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set({'panier': panier.toList()});
-    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('panier', panier.map((id) => id.toString()).toList());
   }
-
-
 
   Future<Set<int>> loadFavorites() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        List<dynamic> storedFavorites = userDoc.data()?['favorites'] ?? [];
-        print('Loaded favorites: $storedFavorites');
-        return storedFavorites.map((id) => id as int).toSet();
-      }
-    }
-    return {};
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? storedFavorites = prefs.getStringList('favorites');
+    return storedFavorites != null ? storedFavorites.map((id) => int.parse(id)).toSet() : {};
   }
-
-
 
   Future<Set<int>> loadPanier() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      List<int>? storedPanier = doc['panier']?.cast<int>();
-      print('Loaded panier: $storedPanier');
-      return storedPanier != null ? storedPanier.toSet() : {};
-    }
-    return {};
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? storedPanier = prefs.getStringList('panier');
+    return storedPanier != null ? storedPanier.map((id) => int.parse(id)).toSet() : {};
   }
-
 
 
   @override
@@ -187,7 +167,6 @@ class _MyAppState extends State<AppWithNavigation> {
     super.initState();
     initAuthStateListener();
     loadFavorites().then((loadedFavorites) {
-      print('Initial favorites: $loadedFavorites');
       setState(() {
         _favorites = loadedFavorites;
       });
@@ -202,7 +181,7 @@ class _MyAppState extends State<AppWithNavigation> {
 
   @override
   void dispose() {
-    _authStateSubscription?.cancel();
+    _authStateSubscription?.cancel(); // Ajoutez cette ligne
     super.dispose();
   }
 
@@ -214,9 +193,8 @@ class _MyAppState extends State<AppWithNavigation> {
       } else {
         _favorites.add(id);
       }
+      saveFavorites(_favorites);
     });
-    print('Toggled favorite, new favorites: $_favorites');
-    saveFavorites(_favorites);
   }
 
   void _togglePanier(int id) {
@@ -226,9 +204,8 @@ class _MyAppState extends State<AppWithNavigation> {
       } else {
         _panier.add(id);
       }
+      savePanier(_panier);
     });
-    print('Toggled panier, new panier: $_panier');
-    savePanier(_panier);
   }
 
 
@@ -271,7 +248,15 @@ class _MyAppState extends State<AppWithNavigation> {
             leading: Icon(Icons.search),
             title: Text('Rechercher'),
             onTap: () {
-              _navigateToPage(4);
+              _navigateToPage(4); // 4 est l'index de la page de recherche
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.history),
+            title: Text('Historique des achats'),
+            onTap: () {
+              _navigateToPage(5); // 5 est l'index de la page d'historique des achats
               Navigator.pop(context);
             },
           ),
@@ -300,6 +285,7 @@ class _MyAppState extends State<AppWithNavigation> {
       ),
     );
   }
+
 
 
 
@@ -348,7 +334,29 @@ class _MyHomePageState extends State<MyHomePage> {
   int _page = 1;
 
   List<Article> _displayedArticles = [];
+  Set<int> _favorites = {};
+  Set<int> _panier = {};
 
+
+  void _toggleFavorite(int id) {
+    setState(() {
+      if (_favorites.contains(id)) {
+        _favorites.remove(id);
+      } else {
+        _favorites.add(id);
+      }
+    });
+  }
+
+  void _togglePanier(int id) {
+    setState(() {
+      if (_panier.contains(id)) {
+        _panier.remove(id);
+      } else {
+        _panier.add(id);
+      }
+    });
+  }
 
   Future<List<Article>> fetchArticles() async {
     final response = await http.get(Uri.parse('https://fakestoreapi.com/products'));
@@ -458,93 +466,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             );
           }
-        },
-      ),
-    );
-  }
-}
-class SearchPage extends StatefulWidget {
-  final List<Article> allArticles;
-  final Set<int> favorites;
-  final Function(int) toggleFavorite;
-  final Set<int> panier;
-  final Function(int) togglePanier;
-
-  const SearchPage({
-    Key? key,
-    required this.allArticles,
-    required this.favorites,
-    required this.toggleFavorite,
-    required this.panier,
-    required this.togglePanier,
-  }) : super(key: key);
-
-  @override
-  _SearchPageState createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  List<Article> _searchResults = [];
-  String _searchText = '';
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  void _updateSearchResults(String searchText) {
-    setState(() {
-      _searchText = searchText;
-      _searchResults = widget.allArticles
-          .where((article) => article.title.toLowerCase().contains(searchText.toLowerCase()))
-          .toList();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: TextField(
-          onChanged: _updateSearchResults,
-          decoration: InputDecoration(
-            hintText: 'Rechercher...',
-            border: InputBorder.none,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {
-            _scaffoldKey.currentState!.openDrawer();
-          },
-        ),
-      ),
-      body: ListView.builder(
-        itemCount: _searchResults.length,
-        itemBuilder: (context, index) {
-          final article = _searchResults[index];
-          return ListTile(
-            leading: Image.network(
-              article.image,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            ),
-            title: Text(article.title),
-            subtitle: Text('${article.price}€',style: const TextStyle(color: Colors.green)),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ArticleDetailPage(article: article)),
-              );
-            },
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(icon: widget.favorites.contains(article.id) ? Icon(Icons.favorite, color: Colors.red) : Icon(Icons.favorite_border), onPressed: () => widget.toggleFavorite(article.id),),
-
-                IconButton(icon: widget.panier.contains(article.id) ? Icon(Icons.shopping_cart, color: Colors.blue) : Icon(Icons.shopping_cart_outlined), onPressed: () => widget.togglePanier(article.id),),
-
-              ],
-            ),
-          );
         },
       ),
     );

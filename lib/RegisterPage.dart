@@ -61,7 +61,7 @@ class _RegisterPageState extends State<RegisterPage> {
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: 'Identifiant',
-                hintText: 'exemple@gmail.com',
+                hintText: 'exemple@gmail.com', // Ajout du texte de fond (placeholder)
               ),
             ),
             TextFormField(
